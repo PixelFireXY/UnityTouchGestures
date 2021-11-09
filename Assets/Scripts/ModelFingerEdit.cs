@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class ModelFingerEdit : MonoBehaviour
 {
+    [Header("References")]
+    [SerializeField] private Transform myCamera = null;
+
+    [Header("Setup")]
     [SerializeField] private Vector3 defaultLocalPos;
 
     [Header("Pan")]
-    [SerializeField] private /*const*/ float PanSpeed = 0.1f;
+    [SerializeField] private /*const*/ float PanSpeed = 1f;
 
     [SerializeField] private /*const*/ float PanDirectionThreshold = 25f;
     [SerializeField] private /*const*/ float PanMagnitudeThreshold = 0.9f;
@@ -50,14 +54,17 @@ public class ModelFingerEdit : MonoBehaviour
 
     private void Start()
     {
-        SetupDefaultValues();
+        Setup();
     }
 
     /******************** Init ********************/
 
-    public void SetupDefaultValues()
+    public void Setup()
     {
         transform.localPosition = defaultLocalPos;
+
+        if (myCamera == null)
+            myCamera = Camera.main.transform;
     }
 
     /******************** Touch events ********************/
@@ -99,12 +106,19 @@ public class ModelFingerEdit : MonoBehaviour
     private bool ApplyPan_XZ(Vector2 old0, Vector2 new0)
     {
         Vector2 panDirection = old0 - new0;
-        Vector3 newDirection = new Vector3(panDirection.x, 0f, panDirection.y);
+
+        // Transform the current direction to camera relative direction
+        Vector3 relativeCameraX = myCamera.right * panDirection.x;
+        Vector3 relativeCameraZ = myCamera.forward * panDirection.y;
+
+        // Prepare the new direction to move the model
+        Vector3 newDirection = relativeCameraX + relativeCameraZ;
+        newDirection.y = 0f;
 
         if (newDirection.magnitude < PanMagnitudeThreshold)
             return false;
 
-        transform.Translate(-PanSpeed * Time.deltaTime * newDirection);
+        transform.Translate(PanSpeed * Time.deltaTime * -newDirection);
 
         return true;
     }
@@ -126,7 +140,7 @@ public class ModelFingerEdit : MonoBehaviour
         if (newDirection.magnitude < PanMagnitudeThreshold)
             return false;
 
-        transform.Translate(-PanSpeed * Time.deltaTime * newDirection);
+        transform.Translate(PanSpeed * Time.deltaTime * -newDirection);
 
         return true;
     }

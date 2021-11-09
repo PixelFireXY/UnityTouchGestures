@@ -291,9 +291,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultLocalPos: {x: 0, y: 0, z: 0}
-  PanSpeed: 0.1
+  PanSpeed: 1
   PanDirectionThreshold: 25
   PanMagnitudeThreshold: 0.9
+  RotationSpeed: 30
   RotationThreshold: 0.9
   ZoomSpeed: 0.01
   ZoomThreshold: 0.9
