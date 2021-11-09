@@ -11,22 +11,22 @@ public class ModelFingerEdit : MonoBehaviour
     [SerializeField] private Vector3 defaultLocalPos;
 
     [Header("Pan")]
-    [SerializeField] private /*const*/ float PanSpeed = 1f;
+    private float panSpeed = 1f;
 
-    [SerializeField] private /*const*/ float PanDirectionThreshold = 25f;
-    [SerializeField] private /*const*/ float PanMagnitudeThreshold = 0.9f;
+    private const float PanDirectionThreshold = 25f;
+    private const float PanMagnitudeThreshold = 0.9f;
 
     [Header("Rotation")]
-    [SerializeField] private /*const*/ float RotationSpeed = 30f;
+    private const float RotationSpeed = 30f;
 
-    [SerializeField] private /*const*/ float RotationThreshold = 0.9f;
+    private const float RotationThreshold = 0.9f;
 
     [Header("Zoom")]
     private const float ZoomOutMin = 1f;
     private const float ZoomOutMax = 8f;
-    [SerializeField] private /*const*/ float ZoomSpeed = 0.01f;
+    private const float ZoomSpeed = 0.01f;
 
-    [SerializeField] private /*const*/ float ZoomThreshold = 0.9f;
+    private const float ZoomThreshold = 0.9f;
 
     /******************** Mono ********************/
 
@@ -65,7 +65,7 @@ public class ModelFingerEdit : MonoBehaviour
 
         // Because when we pan, the model moves always on the oposite we want to go,
         // we must invert the speed to a negative value
-        PanSpeed = -PanSpeed;
+        panSpeed = -panSpeed;
 
         if (myCamera == null)
             myCamera = Camera.main.transform;
@@ -122,7 +122,7 @@ public class ModelFingerEdit : MonoBehaviour
         if (newDirection.magnitude < PanMagnitudeThreshold)
             return false;
 
-        transform.Translate(PanSpeed * Time.deltaTime * -newDirection);
+        transform.Translate(panSpeed * Time.deltaTime * newDirection);
 
         return true;
     }
@@ -144,7 +144,7 @@ public class ModelFingerEdit : MonoBehaviour
         if (newDirection.magnitude < PanMagnitudeThreshold)
             return false;
 
-        transform.Translate(PanSpeed * Time.deltaTime * -newDirection);
+        transform.Translate(panSpeed * Time.deltaTime * newDirection);
 
         return true;
     }
