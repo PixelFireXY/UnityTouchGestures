@@ -63,7 +63,7 @@ public class ModelFingerEdit : MonoBehaviour
     {
         transform.localPosition = defaultLocalPos;
 
-        // Because when pan the model moves always the oposite we want to go,
+        // Because when we pan, the model moves always on the oposite we want to go,
         // we must invert the speed to a negative value
         PanSpeed = -PanSpeed;
 
