@@ -9,14 +9,14 @@ public class TouchManager : MonoBehaviour
     public static event Action<Vector2, Vector2> OnOneTouchStay;
     public static event Action<Vector2> OnOneTouchExit;
 
-    private Vector2 lastOneTouchStay;
+    private Vector2? lastOneTouchStay;
 
     public static event Action<Vector2, Vector2> OnTwoTouchEnter;
     public static event Action<Vector2, Vector2, Vector2, Vector2> OnTwoTouchStay;
     public static event Action<Vector2, Vector2> OnTwoTouchExit;
 
-    private Vector2 lastTwoTouchStay_0;
-    private Vector2 lastTwoTouchStay_1;
+    private Vector2? lastTwoTouchStay_0;
+    private Vector2? lastTwoTouchStay_1;
 
     /******************** Mono ********************/
 
@@ -55,13 +55,7 @@ public class TouchManager : MonoBehaviour
             case TouchPhase.Moved:
                 InvokeOneTouchStay(touchPosition);
                 break;
-            case TouchPhase.Stationary:
-                InvokeOneTouchStay(touchPosition);
-                break;
             case TouchPhase.Ended:
-                InvokeOneTouchExit(touchPosition);
-                break;
-            case TouchPhase.Canceled:
                 InvokeOneTouchExit(touchPosition);
                 break;
         }
@@ -83,13 +77,7 @@ public class TouchManager : MonoBehaviour
             case TouchPhase.Moved:
                 InvokeTwoTouchStay(firstTouchPosition, secondTouchPosition);
                 break;
-            case TouchPhase.Stationary:
-                InvokeTwoTouchStay(firstTouchPosition, secondTouchPosition);
-                break;
             case TouchPhase.Ended:
-                InvokeTwoTouchExit(firstTouchPosition, secondTouchPosition);
-                break;
-            case TouchPhase.Canceled:
                 InvokeTwoTouchExit(firstTouchPosition, secondTouchPosition);
                 break;
         }
@@ -106,7 +94,10 @@ public class TouchManager : MonoBehaviour
 
     private void InvokeOneTouchStay(Vector2 newTouchPos)
     {
-        OnOneTouchStay?.Invoke(lastOneTouchStay, newTouchPos);
+        if (lastOneTouchStay == null)
+            lastOneTouchStay = newTouchPos;
+        
+        OnOneTouchStay?.Invoke((Vector2)lastOneTouchStay, newTouchPos);
 
         lastOneTouchStay = newTouchPos;
     }
@@ -128,7 +119,14 @@ public class TouchManager : MonoBehaviour
 
     private void InvokeTwoTouchStay(Vector2 newFirstTouchPos, Vector2 newSecondTouchPos)
     {
-        OnTwoTouchStay?.Invoke(lastTwoTouchStay_0, lastTwoTouchStay_1, newFirstTouchPos, newSecondTouchPos);
+        if(lastTwoTouchStay_0 == null ||
+            lastTwoTouchStay_1 == null)
+        {
+            lastTwoTouchStay_0 = newFirstTouchPos;
+            lastTwoTouchStay_1 = newSecondTouchPos;
+        }
+
+        OnTwoTouchStay?.Invoke((Vector2)lastTwoTouchStay_0, (Vector2)lastTwoTouchStay_1, newFirstTouchPos, newSecondTouchPos);
 
         lastTwoTouchStay_0 = newFirstTouchPos;
         lastTwoTouchStay_1 = newSecondTouchPos;
@@ -137,5 +135,8 @@ public class TouchManager : MonoBehaviour
     private void InvokeTwoTouchExit(Vector2 newFirstTouchPos, Vector2 newSecondTouchPos)
     {
         OnTwoTouchExit?.Invoke(newFirstTouchPos, newSecondTouchPos);
+
+        lastTwoTouchStay_0 = null;
+        lastTwoTouchStay_1 = null;
     }
 }

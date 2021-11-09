@@ -7,20 +7,20 @@ public class ModelFingerEdit : MonoBehaviour
     [SerializeField] private Vector3 defaultLocalPos;
 
     [Header("Pan")]
-    private const float PanSpeed = 1f;
+    [SerializeField] private /*const*/ float PanSpeed = 0.1f;
 
-    [SerializeField] private /*const*/ float PanThreshold = 0.9f;
+    [SerializeField] private /*const*/ float PanDirectionThreshold = 25f;
+    [SerializeField] private /*const*/ float PanMagnitudeThreshold = 0.9f;
 
     [Header("Rotation")]
-    private const float RotationSpeed = 30f;
+    [SerializeField] private /*const*/ float RotationSpeed = 30f;
 
     [SerializeField] private /*const*/ float RotationThreshold = 0.9f;
-    [SerializeField] private /*const*/ float Rotation45Degrees = 45f;
 
     [Header("Zoom")]
     private const float ZoomOutMin = 1f;
     private const float ZoomOutMax = 8f;
-    private const float ZoomSpeed = 5f;
+    [SerializeField] private /*const*/ float ZoomSpeed = 0.01f;
 
     [SerializeField] private /*const*/ float ZoomThreshold = 0.9f;
 
@@ -89,19 +89,19 @@ public class ModelFingerEdit : MonoBehaviour
 
     private void OnTwoTouchesStay(Vector2 old0, Vector2 old1, Vector2 new0, Vector2 new1)
     {
-        if (ApplyRotation(old0, old1, new0, new1)) { }
+        if (ApplyPan_Y(old0, old1, new0, new1)) { }
+        else if (ApplyRotation(old0, old1, new0, new1)) { }
         else if (ApplyZoom(old0, old1, new0, new1)) { }
-        //else if (ApplyPan_Y(old0, old1, new0, new1)) { }
     }
 
-    /******************** Edit NFT ********************/
+    /******************** Edit Model ********************/
 
     private bool ApplyPan_XZ(Vector2 old0, Vector2 new0)
     {
         Vector2 panDirection = old0 - new0;
         Vector3 newDirection = new Vector3(panDirection.x, 0f, panDirection.y);
 
-        if (newDirection.magnitude < PanThreshold)
+        if (newDirection.magnitude < PanMagnitudeThreshold)
             return false;
 
         transform.Translate(-PanSpeed * Time.deltaTime * newDirection);
@@ -111,13 +111,19 @@ public class ModelFingerEdit : MonoBehaviour
 
     private bool ApplyPan_Y(Vector2 old0, Vector2 old1, Vector2 new0, Vector2 new1)
     {
+        Vector2 ZeroDir = old0 - new0;
+        Vector2 oneDir = old1 - new1;
+
+        if(Vector2.Angle(oneDir, ZeroDir) > PanDirectionThreshold)
+            return false;
+
         Vector3 oldMiddlePos = (old0 + old1) / 2;
         Vector3 newMiddlePos = (new0 + new1) / 2;
 
         Vector3 posDirection = oldMiddlePos - newMiddlePos;
         Vector3 newDirection = new Vector3(0f, posDirection.y, 0f);
 
-        if (newDirection.magnitude < PanThreshold)
+        if (newDirection.magnitude < PanMagnitudeThreshold)
             return false;
 
         transform.Translate(-PanSpeed * Time.deltaTime * newDirection);
@@ -132,8 +138,7 @@ public class ModelFingerEdit : MonoBehaviour
 
         float rotationAngle = Vector2.Angle(oldDir, currDir);
 
-        if (rotationAngle < RotationThreshold ||
-            rotationAngle > Rotation45Degrees)          // Prevent to confuse the zoom with the rotation
+        if (rotationAngle < RotationThreshold)          // Prevent to confuse the zoom with the rotation
             return false;
 
         // Set the rotation left or right
@@ -151,6 +156,7 @@ public class ModelFingerEdit : MonoBehaviour
         float oldDist = Vector3.Distance(old0, old1);
         float newDist = Vector3.Distance(new0, new1);
         float deltaDist = newDist - oldDist;
+
         float scaleCalculation = Mathf.Clamp(transform.localScale.x + deltaDist * ZoomSpeed, ZoomOutMin, ZoomOutMax);
 
         if (scaleCalculation < ZoomThreshold)
